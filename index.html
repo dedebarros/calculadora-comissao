@@ -593,7 +593,15 @@
         <div class="result-val" id="l-gilberto">R$ 0,00</div>
       </div>
 
-      <div class="result-row separador">Taxa de Administração Mensal (informativo)</div>
+      <div class="result-row separador">A partir do 2º mês</div>
+
+      <div class="result-row verde">
+        <div>
+          <div class="result-label">Repasse ao Proprietário (2º mês em diante)</div>
+          <div class="result-pct" id="l-prop2-pct">90% do aluguel + condomínio</div>
+        </div>
+        <div class="result-val" id="l-proprietario2">R$ 0,00</div>
+      </div>
 
       <div class="result-row">
         <div>
@@ -779,14 +787,17 @@ function calcLocacao() {
   const gilberto     = comissao * 0.30;
   const taxaAdm      = aluguel  * 0.10;
 
-  document.getElementById('l-inquilino').textContent    = fmtBRL(inquilino);
-  document.getElementById('l-proprietario').textContent = fmtBRL(proprietario);
-  document.getElementById('l-comissao').textContent     = fmtBRL(comissao);
-  document.getElementById('l-captador').textContent     = fmtBRL(captador);
-  document.getElementById('l-indicacao').textContent    = fmtBRL(indicacao);
-  document.getElementById('l-unico').textContent        = fmtBRL(unico);
-  document.getElementById('l-gilberto').textContent     = fmtBRL(gilberto);
-  document.getElementById('l-taxaadm').textContent      = fmtBRL(taxaAdm);
+  const proprietario2 = aluguel * 0.90 + cond;
+
+  document.getElementById('l-inquilino').textContent     = fmtBRL(inquilino);
+  document.getElementById('l-proprietario').textContent  = fmtBRL(proprietario);
+  document.getElementById('l-comissao').textContent      = fmtBRL(comissao);
+  document.getElementById('l-captador').textContent      = fmtBRL(captador);
+  document.getElementById('l-indicacao').textContent     = fmtBRL(indicacao);
+  document.getElementById('l-unico').textContent         = fmtBRL(unico);
+  document.getElementById('l-gilberto').textContent      = fmtBRL(gilberto);
+  document.getElementById('l-taxaadm').textContent       = fmtBRL(taxaAdm);
+  document.getElementById('l-proprietario2').textContent = fmtBRL(proprietario2);
 
   const temCond = cond > 0;
   document.getElementById('l-inquilino-pct').textContent = temCond
@@ -795,6 +806,9 @@ function calcLocacao() {
   document.getElementById('l-prop-pct').textContent = temCond
     ? '50% do aluguel + condomínio ' + fmtBRL(cond)
     : '50% do primeiro aluguel';
+  document.getElementById('l-prop2-pct').textContent = temCond
+    ? '90% do aluguel + condomínio ' + fmtBRL(cond)
+    : '90% do aluguel (descontada taxa adm. 10%)';
 
   const isDois = cen === 'dois';
   document.getElementById('l-row-captador').classList.toggle('hidden', !isDois);
