@@ -365,7 +365,6 @@
 
       <label style="margin-top:18px;">Comissão total sobre o valor de venda</label>
       <div class="pct-group" id="v-pct-group">
-        <button class="pct-btn" onclick="setPct('vendas',3)">3%</button>
         <button class="pct-btn active" onclick="setPct('vendas',4)">4%</button>
         <button class="pct-btn" onclick="setPct('vendas',5)">5%</button>
         <button class="pct-btn" onclick="setPct('vendas',6)">6%</button>
@@ -384,6 +383,7 @@
       <div class="toggle-group">
         <button class="toggle-btn active" id="v-tog-dois" onclick="setToggle('vendas','dois')">Captador + Vendedor</button>
         <button class="toggle-btn" id="v-tog-unico" onclick="setToggle('vendas','unico')">Corretor Único</button>
+        <button class="toggle-btn" id="v-tog-parceria" onclick="setToggle('vendas','parceria')">Parceria Externa</button>
       </div>
       <button class="btn-limpar" onclick="resetVendas()">↺ Limpar / Novo cálculo</button>
     </div>
@@ -402,7 +402,7 @@
       <div class="result-row highlight">
         <div>
           <div class="result-label">Gilberto Rocha Imobiliária</div>
-          <div class="result-pct">40% da comissão total</div>
+          <div class="result-pct" id="v-gilberto-pct">40% da comissão total</div>
         </div>
         <div class="result-val" id="v-gilberto">R$ 0,00</div>
       </div>
@@ -429,6 +429,22 @@
           <div class="result-pct">60% da comissão total</div>
         </div>
         <div class="result-val" id="v-unico">R$ 0,00</div>
+      </div>
+
+      <div class="result-row hidden" id="v-row-parceiro">
+        <div>
+          <div class="result-label">Parceiro Externo</div>
+          <div class="result-pct">50% da comissão total</div>
+        </div>
+        <div class="result-val" id="v-parceiro">R$ 0,00</div>
+      </div>
+
+      <div class="result-row hidden" id="v-row-honorarios">
+        <div>
+          <div class="result-label">Corretor Interno — Honorários</div>
+          <div class="result-pct">10% da comissão total</div>
+        </div>
+        <div class="result-val" id="v-honorarios">R$ 0,00</div>
       </div>
 
     </div>
@@ -696,6 +712,7 @@ function setToggle(tab, cenario) {
   if (tab === 'vendas') {
     document.getElementById('v-tog-dois').classList.toggle('active', cenario === 'dois');
     document.getElementById('v-tog-unico').classList.toggle('active', cenario === 'unico');
+    document.getElementById('v-tog-parceria').classList.toggle('active', cenario === 'parceria');
     calcVendas();
   } else {
     document.getElementById('l-tog-dois').classList.toggle('active', cenario === 'dois');
@@ -718,23 +735,37 @@ function calcVendas() {
   if (!valor) { zero.style.display = ''; res.style.display = 'none'; return; }
   zero.style.display = 'none'; res.style.display = '';
 
-  const total    = valor * (pct / 100);
-  const gilberto = total * 0.40;
-  const captador = total * 0.30;
-  const vendedor = total * 0.30;
-  const unico    = total * 0.60;
+  const total             = valor * (pct / 100);
+  const isDois            = cen === 'dois';
+  const isUnico           = cen === 'unico';
+  const isParceria        = cen === 'parceria';
 
-  document.getElementById('v-total').textContent    = fmtBRL(total);
-  document.getElementById('v-gilberto').textContent = fmtBRL(gilberto);
-  document.getElementById('v-captador').textContent = fmtBRL(captador);
-  document.getElementById('v-vendedor').textContent = fmtBRL(vendedor);
-  document.getElementById('v-unico').textContent    = fmtBRL(unico);
-  document.getElementById('v-pct-label').textContent = pct + '% sobre o valor';
+  const gilberto          = total * 0.40;
+  const captador          = total * 0.30;
+  const vendedor          = total * 0.30;
+  const unico             = total * 0.60;
+  const parceiro          = total * 0.50;
+  const internoPool       = total * 0.50;
+  const gilbertoParceria  = internoPool * 0.40;
+  const corretorParceria  = internoPool * 0.60;
 
-  const isDois = cen === 'dois';
+  document.getElementById('v-total').textContent      = fmtBRL(total);
+  document.getElementById('v-gilberto').textContent   = fmtBRL(isParceria ? gilbertoParceria : gilberto);
+  document.getElementById('v-captador').textContent   = fmtBRL(captador);
+  document.getElementById('v-vendedor').textContent   = fmtBRL(vendedor);
+  document.getElementById('v-unico').textContent      = fmtBRL(unico);
+  document.getElementById('v-parceiro').textContent   = fmtBRL(parceiro);
+  document.getElementById('v-honorarios').textContent = fmtBRL(corretorParceria);
+  document.getElementById('v-pct-label').textContent   = pct + '% sobre o valor';
+  document.getElementById('v-gilberto-pct').textContent = isParceria
+    ? '40% dos 50% internos (20% do total)'
+    : '40% da comissão total';
+
   document.getElementById('v-row-captador').classList.toggle('hidden', !isDois);
   document.getElementById('v-row-vendedor').classList.toggle('hidden', !isDois);
-  document.getElementById('v-row-unico').classList.toggle('hidden', isDois);
+  document.getElementById('v-row-unico').classList.toggle('hidden', !isUnico);
+  document.getElementById('v-row-parceiro').classList.toggle('hidden', !isParceria);
+  document.getElementById('v-row-honorarios').classList.toggle('hidden', !isParceria);
 }
 
 // ── CÁLCULO EMPREENDIMENTOS ──
@@ -827,11 +858,14 @@ function resetVendas() {
   });
   document.getElementById('v-tog-dois').classList.add('active');
   document.getElementById('v-tog-unico').classList.remove('active');
+  document.getElementById('v-tog-parceria').classList.remove('active');
   document.getElementById('v-results').style.display = 'none';
   document.getElementById('v-zero').style.display = '';
   document.getElementById('v-row-captador').classList.remove('hidden');
   document.getElementById('v-row-vendedor').classList.remove('hidden');
   document.getElementById('v-row-unico').classList.add('hidden');
+  document.getElementById('v-row-parceiro').classList.add('hidden');
+  document.getElementById('v-row-honorarios').classList.add('hidden');
 }
 
 function resetEmp() {
