@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Comissão – Gilberto Rocha Imobiliária</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul:    #1a2e4a;
+    --azul2:   #243d61;
+    --laranja: #e87722;
+    --laranja2:#f59340;
+    --cinza:   #f4f6f9;
+    --cinza2:  #e2e8f0;
+    --texto:   #1e293b;
+    --sub:     #64748b;
+    --verde:   #16a34a;
+    --radius:  12px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--cinza);
+    color: var(--texto);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul2) 100%);
+    color: #fff;
+    padding: 24px 20px 20px;
+    text-align: center;
+  }
+  header .brand { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.3px; }
+  header .brand span { color: var(--laranja2); }
+  header .sub { font-size: 0.85rem; opacity: 0.75; margin-top: 4px; }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    background: var(--azul);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    flex: 1;
+    min-width: 110px;
+    padding: 14px 8px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.55);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab-btn:hover { color: rgba(255,255,255,0.85); }
+  .tab-btn.active { color: #fff; border-bottom-color: var(--laranja); }
+
+  /* ── MAIN ── */
+  main { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── CARD ── */
+  .card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+  .card-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--sub);
+    margin-bottom: 16px;
+  }
+
+  /* ── FORM ELEMENTS ── */
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--sub);
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+  label:first-of-type { margin-top: 0; }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--cinza2);
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--texto);
+    background: var(--cinza);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus { border-color: var(--laranja); background: #fff; }
+  input[type="text"]::placeholder { font-weight: 400; color: #aab; }
+
+  /* ── PERCENT BUTTONS ── */
+  .pct-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .pct-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: 10px 6px;
+    background: var(--cinza);
+    border: 2px solid var(--cinza2);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--sub);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .pct-btn:hover { border-color: var(--laranja2); color: var(--laranja); }
+  .pct-btn.active {
+    background: var(--laranja);
+    border-color: var(--laranja);
+    color: #fff;
+  }
+
+  /* ── TOGGLE ── */
+  .toggle-group {
+    display: flex;
+    background: var(--cinza);
+    border-radius: 8px;
+    padding: 3px;
+    border: 2px solid var(--cinza2);
+  }
+  .toggle-btn {
+    flex: 1;
+    padding: 9px 8px;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--sub);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .toggle-btn.active {
+    background: var(--azul);
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+
+  /* ── SELECT ── */
+  select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid var(--cinza2);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--texto);
+    background: var(--cinza);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+  select:focus { border-color: var(--laranja); background-color: #fff; }
+
+  /* ── RESULTS ── */
+  .results {
+    background: #fff;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    margin-bottom: 16px;
+  }
+  .results-header {
+    background: var(--azul);
+    color: #fff;
+    padding: 12px 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .result-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--cinza2);
+    transition: opacity 0.2s;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row.hidden { display: none; }
+  .result-row.highlight { background: #fffbf5; }
+  .result-row.total { background: var(--azul); }
+  .result-row.total .result-label,
+  .result-row.total .result-pct { color: rgba(255,255,255,0.75); }
+  .result-row.total .result-val { color: #fff; font-size: 1.25rem; }
+
+  .result-row.verde { background: #f0fdf4; }
+  .result-row.verde .result-val { color: var(--verde); }
+
+  .result-row.separador {
+    background: var(--cinza);
+    padding: 8px 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--sub);
+  }
+
+  .result-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--texto);
+  }
+  .result-pct {
+    font-size: 0.72rem;
+    color: var(--sub);
+    margin-top: 2px;
+  }
+  .result-val {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--laranja);
+    text-align: right;
+    min-width: 130px;
+  }
+
+  /* ── AVISO ── */
+  .aviso {
+    background: #fff8ed;
+    border-left: 4px solid var(--laranja);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: #92400e;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+  .aviso.hidden { display: none; }
+  .aviso.info {
+    background: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+  }
+
+  /* ── BOTÃO LIMPAR ── */
+  .btn-limpar {
+    width: 100%;
+    margin-top: 18px;
+    padding: 10px;
+    background: none;
+    border: 2px solid var(--cinza2);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--sub);
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: all 0.15s;
+  }
+  .btn-limpar:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: #fef2f2;
+  }
+
+  /* ── ZERO STATE ── */
+  .zero-state {
+    text-align: center;
+    padding: 32px 20px;
+    color: var(--sub);
+    font-size: 0.9rem;
+  }
+  .zero-state .icon { font-size: 2rem; margin-bottom: 8px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--azul);
+    margin-top: 8px;
+    padding: 20px 16px;
+  }
+  .footer-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .footer-logo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+  }
+  .footer-logo span { color: var(--laranja2); }
+  .footer-copy {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 4px;
+  }
+  .footer-copy strong { color: rgba(255,255,255,0.85); }
+  .footer-sub {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.35);
+    font-style: italic;
+  }
+
+  @media (max-width: 480px) {
+    .result-val { font-size: 0.95rem; min-width: 100px; }
+    .result-row.total .result-val { font-size: 1.1rem; }
+    header .brand { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Gilberto Rocha <span>Imobiliária</span></div>
+  <div class="sub">Calculadora de Comissionamento</div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('vendas')">Vendas</button>
+  <button class="tab-btn" onclick="showTab('empreendimentos')">Empreendimentos</button>
+  <button class="tab-btn" onclick="showTab('locacao')">Locação</button>
+</div>
+
+<main>
+
+  <!-- ══════════════════════════════════════════
+       ABA 1 — VENDAS
+  ══════════════════════════════════════════ -->
+  <div id="sec-vendas" class="section active">
+
+    <div class="card">
+      <div class="card-title">Dados da Venda</div>
+
+      <label>Valor do imóvel</label>
+      <input type="text" id="v-valor" placeholder="R$ 0,00" oninput="calcVendas()" inputmode="numeric">
+
+      <label style="margin-top:18px;">Comissão total sobre o valor de venda</label>
+      <div class="pct-group" id="v-pct-group">
+        <button class="pct-btn" onclick="setPct('vendas',3)">3%</button>
+        <button class="pct-btn active" onclick="setPct('vendas',4)">4%</button>
+        <button class="pct-btn" onclick="setPct('vendas',5)">5%</button>
+        <button class="pct-btn" onclick="setPct('vendas',6)">6%</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+        <input type="number" id="v-pct-custom" min="0.1" max="20" step="0.1"
+          placeholder="Outro %"
+          oninput="setPctCustom()"
+          style="width:100%;padding:10px 14px;border:2px solid var(--cinza2);border-radius:8px;font-size:0.95rem;font-weight:600;color:var(--texto);background:var(--cinza);outline:none;transition:border-color 0.2s;"
+          onfocus="this.style.borderColor='var(--laranja)';this.style.background='#fff'"
+          onblur="this.style.borderColor='var(--cinza2)';this.style.background='var(--cinza)'">
+        <span style="white-space:nowrap;font-size:0.85rem;font-weight:700;color:var(--sub);">%</span>
+      </div>
+
+      <label style="margin-top:18px;">Cenário de corretores</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="v-tog-dois" onclick="setToggle('vendas','dois')">Captador + Vendedor</button>
+        <button class="toggle-btn" id="v-tog-unico" onclick="setToggle('vendas','unico')">Corretor Único</button>
+      </div>
+      <button class="btn-limpar" onclick="resetVendas()">↺ Limpar / Novo cálculo</button>
+    </div>
+
+    <div id="v-results" class="results" style="display:none;">
+      <div class="results-header">Distribuição da Comissão</div>
+
+      <div class="result-row total">
+        <div>
+          <div class="result-label">Comissão Total Gerada</div>
+          <div class="result-pct" id="v-pct-label">4% sobre o valor</div>
+        </div>
+        <div class="result-val" id="v-total">R$ 0,00</div>
+      </div>
+
+      <div class="result-row highlight">
+        <div>
+          <div class="result-label">Gilberto Rocha Imobiliária</div>
+          <div class="result-pct">40% da comissão total</div>
+        </div>
+        <div class="result-val" id="v-gilberto">R$ 0,00</div>
+      </div>
+
+      <div class="result-row" id="v-row-captador">
+        <div>
+          <div class="result-label">Corretor Captador</div>
+          <div class="result-pct">30% da comissão total</div>
+        </div>
+        <div class="result-val" id="v-captador">R$ 0,00</div>
+      </div>
+
+      <div class="result-row" id="v-row-vendedor">
+        <div>
+          <div class="result-label">Corretor Vendedor</div>
+          <div class="result-pct">30% da comissão total</div>
+        </div>
+        <div class="result-val" id="v-vendedor">R$ 0,00</div>
+      </div>
+
+      <div class="result-row hidden" id="v-row-unico">
+        <div>
+          <div class="result-label">Corretor Único (captação + venda)</div>
+          <div class="result-pct">60% da comissão total</div>
+        </div>
+        <div class="result-val" id="v-unico">R$ 0,00</div>
+      </div>
+
+    </div>
+
+    <div id="v-zero" class="results">
+      <div class="zero-state">
+        <div class="icon">🏠</div>
+        Digite o valor do imóvel para ver a distribuição
+      </div>
+    </div>
+
+  </div><!-- /vendas -->
+
+
+  <!-- ══════════════════════════════════════════
+       ABA 2 — EMPREENDIMENTOS
+  ══════════════════════════════════════════ -->
+  <div id="sec-empreendimentos" class="section">
+
+    <div class="card">
+      <div class="card-title">Dados do Empreendimento</div>
+
+      <label>Valor do imóvel (contrato)</label>
+      <input type="text" id="e-valor" placeholder="R$ 0,00" oninput="calcEmp()" inputmode="numeric">
+
+      <label style="margin-top:18px;">Forma de pagamento</label>
+      <select id="e-pagamento" onchange="calcEmp()">
+        <option value="avista">À vista / Fluxo padrão</option>
+        <option value="parcelado">Parcelado / Fluxo alternativo</option>
+      </select>
+
+      <div class="aviso" id="e-aviso-parcelado" style="margin-top:10px; display:none;">
+        Comissão acompanha o cronograma de pagamento do cliente.
+      </div>
+
+      <div class="aviso info" style="margin-top:10px;">
+        Comissão fixada em <strong>4%</strong> sobre o valor do contrato, conforme acordo com a construtora. A imobiliária absorve os custos de nota fiscal — o corretor recebe os <strong>2% integralmente</strong>.
+      </div>
+      <button class="btn-limpar" onclick="resetEmp()">↺ Limpar / Novo cálculo</button>
+    </div>
+
+    <div id="e-results" class="results" style="display:none;">
+      <div class="results-header">Distribuição da Comissão — 4% fixo</div>
+
+      <div class="result-row total">
+        <div>
+          <div class="result-label">Comissão Total</div>
+          <div class="result-pct">4% sobre o valor do contrato</div>
+        </div>
+        <div class="result-val" id="e-total">R$ 0,00</div>
+      </div>
+
+      <div class="result-row highlight">
+        <div>
+          <div class="result-label">Gilberto Rocha Imobiliária</div>
+          <div class="result-pct">2% — gestão, plantão e estrutura</div>
+        </div>
+        <div class="result-val" id="e-gilberto">R$ 0,00</div>
+      </div>
+
+      <div class="result-row">
+        <div>
+          <div class="result-label">Corretor Responsável</div>
+          <div class="result-pct">2% — NF absorvida pela imobiliária</div>
+        </div>
+        <div class="result-val" id="e-corretor">R$ 0,00</div>
+      </div>
+
+    </div>
+
+    <div id="e-zero" class="results">
+      <div class="zero-state">
+        <div class="icon">🏗️</div>
+        Digite o valor do imóvel para ver a distribuição
+      </div>
+    </div>
+
+  </div><!-- /empreendimentos -->
+
+
+  <!-- ══════════════════════════════════════════
+       ABA 3 — LOCAÇÃO
+  ══════════════════════════════════════════ -->
+  <div id="sec-locacao" class="section">
+
+    <div class="card">
+      <div class="card-title">Dados da Locação</div>
+
+      <label>Valor do aluguel mensal</label>
+      <input type="text" id="l-valor" placeholder="R$ 0,00" oninput="calcLocacao()" inputmode="numeric">
+
+      <label style="margin-top:18px;">Condomínio mensal <span style="font-weight:400;color:#94a3b8;">(opcional)</span></label>
+      <input type="text" id="l-cond" placeholder="R$ 0,00" oninput="calcLocacao()" inputmode="numeric">
+      <div class="aviso info" style="margin-top:8px;">
+        Condomínio <strong>não entra na comissão</strong>. Entra no total pago pelo inquilino e no repasse ao proprietário.
+      </div>
+
+      <label style="margin-top:18px;">Cenário de corretores</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="l-tog-dois" onclick="setToggle('locacao','dois')">Captador + Indicação</button>
+        <button class="toggle-btn" id="l-tog-unico" onclick="setToggle('locacao','unico')">Corretor Único</button>
+      </div>
+      <button class="btn-limpar" onclick="resetLocacao()">↺ Limpar / Novo cálculo</button>
+    </div>
+
+    <div id="l-results" class="results" style="display:none;">
+      <div class="results-header">Distribuição — Primeiro Aluguel</div>
+
+      <div class="result-row" id="l-row-inquilino" style="background:#f8fafc;">
+        <div>
+          <div class="result-label">Total que o Inquilino Paga (1º mês)</div>
+          <div class="result-pct" id="l-inquilino-pct">Aluguel + condomínio</div>
+        </div>
+        <div class="result-val" id="l-inquilino" style="color:var(--texto);">R$ 0,00</div>
+      </div>
+
+      <div class="result-row verde">
+        <div>
+          <div class="result-label">Repasse ao Proprietário (1º mês)</div>
+          <div class="result-pct" id="l-prop-pct">50% do aluguel + condomínio</div>
+        </div>
+        <div class="result-val" id="l-proprietario">R$ 0,00</div>
+      </div>
+
+      <div class="result-row total">
+        <div>
+          <div class="result-label">Comissão Total (imob. + corretores)</div>
+          <div class="result-pct">50% do primeiro aluguel</div>
+        </div>
+        <div class="result-val" id="l-comissao">R$ 0,00</div>
+      </div>
+
+      <div class="result-row" id="l-row-captador">
+        <div>
+          <div class="result-label">Corretor Captador</div>
+          <div class="result-pct">35% da comissão</div>
+        </div>
+        <div class="result-val" id="l-captador">R$ 0,00</div>
+      </div>
+
+      <div class="result-row" id="l-row-indicacao">
+        <div>
+          <div class="result-label">Corretor Indicação (trouxe o inquilino)</div>
+          <div class="result-pct">35% da comissão</div>
+        </div>
+        <div class="result-val" id="l-indicacao">R$ 0,00</div>
+      </div>
+
+      <div class="result-row hidden" id="l-row-unico">
+        <div>
+          <div class="result-label">Corretor Único (captação + locação)</div>
+          <div class="result-pct">70% da comissão</div>
+        </div>
+        <div class="result-val" id="l-unico">R$ 0,00</div>
+      </div>
+
+      <div class="result-row highlight">
+        <div>
+          <div class="result-label">Gilberto Rocha Imobiliária</div>
+          <div class="result-pct">30% da comissão</div>
+        </div>
+        <div class="result-val" id="l-gilberto">R$ 0,00</div>
+      </div>
+
+      <div class="result-row separador">Taxa de Administração Mensal (informativo)</div>
+
+      <div class="result-row">
+        <div>
+          <div class="result-label">Taxa Adm. Mensal — Imobiliária</div>
+          <div class="result-pct">10% do aluguel — exclusivo para gestão do imóvel</div>
+        </div>
+        <div class="result-val" id="l-taxaadm">R$ 0,00</div>
+      </div>
+
+    </div>
+
+    <div id="l-zero" class="results">
+      <div class="zero-state">
+        <div class="icon">🔑</div>
+        Digite o valor do aluguel para ver a distribuição
+      </div>
+    </div>
+
+  </div><!-- /locacao -->
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Gilberto Rocha <span>Imobiliária</span></div>
+    <div class="footer-copy">
+      Desenvolvido por <strong>André Barros</strong> &nbsp;·&nbsp; Todos os direitos reservados &nbsp;·&nbsp; © 2025
+    </div>
+    <div class="footer-sub">Uso interno exclusivo — Gilberto Rocha Imobiliária</div>
+  </div>
+</footer>
+
+<script>
+// ── Estado global ──
+const state = {
+  vendas:        { pct: 4, cenario: 'dois' },
+  empreendimentos: {},
+  locacao:       { cenario: 'dois' },
+};
+
+// ── Utilitários ──
+function parseBRL(str) {
+  const clean = str.replace(/[^\d]/g, '');
+  return clean ? parseFloat(clean) / 100 : 0;
+}
+
+function fmtBRL(n) {
+  return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function maskBRL(input) {
+  const raw = input.value.replace(/[^\d]/g, '');
+  if (!raw) { input.value = ''; return; }
+  const n = parseFloat(raw) / 100;
+  input.value = n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+// ── Tabs ──
+function showTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + tab).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── Percent buttons ──
+function setPct(tab, pct) {
+  state[tab].pct = pct;
+  const prefix = tab === 'vendas' ? 'v' : 'e';
+  document.querySelectorAll('#' + prefix + '-pct-group .pct-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.textContent) === pct);
+  });
+  if (tab === 'vendas') {
+    document.getElementById('v-pct-custom').value = '';
+    calcVendas();
+  }
+}
+
+// ── Campo percentual livre (Vendas) ──
+function setPctCustom() {
+  const input = document.getElementById('v-pct-custom');
+  const val   = parseFloat(input.value);
+  if (!val || val <= 0) return;
+  state.vendas.pct = val;
+  document.querySelectorAll('#v-pct-group .pct-btn').forEach(b => b.classList.remove('active'));
+  calcVendas();
+}
+
+// ── Toggle corretores ──
+function setToggle(tab, cenario) {
+  state[tab].cenario = cenario;
+  if (tab === 'vendas') {
+    document.getElementById('v-tog-dois').classList.toggle('active', cenario === 'dois');
+    document.getElementById('v-tog-unico').classList.toggle('active', cenario === 'unico');
+    calcVendas();
+  } else {
+    document.getElementById('l-tog-dois').classList.toggle('active', cenario === 'dois');
+    document.getElementById('l-tog-unico').classList.toggle('active', cenario === 'unico');
+    calcLocacao();
+  }
+}
+
+// ── CÁLCULO VENDAS ──
+function calcVendas() {
+  const input = document.getElementById('v-valor');
+  maskBRL(input);
+  const valor = parseBRL(input.value);
+  const pct   = state.vendas.pct;
+  const cen   = state.vendas.cenario;
+
+  const zero = document.getElementById('v-zero');
+  const res  = document.getElementById('v-results');
+
+  if (!valor) { zero.style.display = ''; res.style.display = 'none'; return; }
+  zero.style.display = 'none'; res.style.display = '';
+
+  const total    = valor * (pct / 100);
+  const gilberto = total * 0.40;
+  const captador = total * 0.30;
+  const vendedor = total * 0.30;
+  const unico    = total * 0.60;
+
+  document.getElementById('v-total').textContent    = fmtBRL(total);
+  document.getElementById('v-gilberto').textContent = fmtBRL(gilberto);
+  document.getElementById('v-captador').textContent = fmtBRL(captador);
+  document.getElementById('v-vendedor').textContent = fmtBRL(vendedor);
+  document.getElementById('v-unico').textContent    = fmtBRL(unico);
+  document.getElementById('v-pct-label').textContent = pct + '% sobre o valor';
+
+  const isDois = cen === 'dois';
+  document.getElementById('v-row-captador').classList.toggle('hidden', !isDois);
+  document.getElementById('v-row-vendedor').classList.toggle('hidden', !isDois);
+  document.getElementById('v-row-unico').classList.toggle('hidden', isDois);
+}
+
+// ── CÁLCULO EMPREENDIMENTOS ──
+function calcEmp() {
+  const input = document.getElementById('e-valor');
+  maskBRL(input);
+  const valor = parseBRL(input.value);
+  const pag   = document.getElementById('e-pagamento').value;
+
+  const zero  = document.getElementById('e-zero');
+  const res   = document.getElementById('e-results');
+  const aviso = document.getElementById('e-aviso-parcelado');
+
+  aviso.style.display = pag === 'parcelado' ? '' : 'none';
+
+  if (!valor) { zero.style.display = ''; res.style.display = 'none'; return; }
+  zero.style.display = 'none'; res.style.display = '';
+
+  const total    = valor * 0.04;
+  const gilberto = valor * 0.02;
+  const corretor = valor * 0.02;
+
+  document.getElementById('e-total').textContent    = fmtBRL(total);
+  document.getElementById('e-gilberto').textContent = fmtBRL(gilberto);
+  document.getElementById('e-corretor').textContent = fmtBRL(corretor);
+}
+
+// ── CÁLCULO LOCAÇÃO ──
+function calcLocacao() {
+  const inputAl = document.getElementById('l-valor');
+  const inputCo = document.getElementById('l-cond');
+  maskBRL(inputAl);
+  maskBRL(inputCo);
+  const aluguel = parseBRL(inputAl.value);
+  const cond    = parseBRL(inputCo.value);
+  const cen     = state.locacao.cenario;
+
+  const zero = document.getElementById('l-zero');
+  const res  = document.getElementById('l-results');
+
+  if (!aluguel) { zero.style.display = ''; res.style.display = 'none'; return; }
+  zero.style.display = 'none'; res.style.display = '';
+
+  const comissao     = aluguel * 0.50;
+  const proprietario = aluguel * 0.50 + cond;
+  const inquilino    = aluguel + cond;
+  const captador     = comissao * 0.35;
+  const indicacao    = comissao * 0.35;
+  const unico        = comissao * 0.70;
+  const gilberto     = comissao * 0.30;
+  const taxaAdm      = aluguel  * 0.10;
+
+  document.getElementById('l-inquilino').textContent    = fmtBRL(inquilino);
+  document.getElementById('l-proprietario').textContent = fmtBRL(proprietario);
+  document.getElementById('l-comissao').textContent     = fmtBRL(comissao);
+  document.getElementById('l-captador').textContent     = fmtBRL(captador);
+  document.getElementById('l-indicacao').textContent    = fmtBRL(indicacao);
+  document.getElementById('l-unico').textContent        = fmtBRL(unico);
+  document.getElementById('l-gilberto').textContent     = fmtBRL(gilberto);
+  document.getElementById('l-taxaadm').textContent      = fmtBRL(taxaAdm);
+
+  const temCond = cond > 0;
+  document.getElementById('l-inquilino-pct').textContent = temCond
+    ? 'Aluguel ' + fmtBRL(aluguel) + ' + Condomínio ' + fmtBRL(cond)
+    : 'Valor total do aluguel';
+  document.getElementById('l-prop-pct').textContent = temCond
+    ? '50% do aluguel + condomínio ' + fmtBRL(cond)
+    : '50% do primeiro aluguel';
+
+  const isDois = cen === 'dois';
+  document.getElementById('l-row-captador').classList.toggle('hidden', !isDois);
+  document.getElementById('l-row-indicacao').classList.toggle('hidden', !isDois);
+  document.getElementById('l-row-unico').classList.toggle('hidden', isDois);
+}
+
+// ── FUNÇÕES DE RESET ──
+function resetVendas() {
+  document.getElementById('v-valor').value = '';
+  document.getElementById('v-pct-custom').value = '';
+  state.vendas.pct = 4;
+  state.vendas.cenario = 'dois';
+  document.querySelectorAll('#v-pct-group .pct-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === '4%');
+  });
+  document.getElementById('v-tog-dois').classList.add('active');
+  document.getElementById('v-tog-unico').classList.remove('active');
+  document.getElementById('v-results').style.display = 'none';
+  document.getElementById('v-zero').style.display = '';
+  document.getElementById('v-row-captador').classList.remove('hidden');
+  document.getElementById('v-row-vendedor').classList.remove('hidden');
+  document.getElementById('v-row-unico').classList.add('hidden');
+}
+
+function resetEmp() {
+  document.getElementById('e-valor').value = '';
+  document.getElementById('e-pagamento').value = 'avista';
+  document.getElementById('e-aviso-parcelado').style.display = 'none';
+  document.getElementById('e-results').style.display = 'none';
+  document.getElementById('e-zero').style.display = '';
+}
+
+function resetLocacao() {
+  document.getElementById('l-valor').value = '';
+  document.getElementById('l-cond').value = '';
+  state.locacao.cenario = 'dois';
+  document.getElementById('l-tog-dois').classList.add('active');
+  document.getElementById('l-tog-unico').classList.remove('active');
+  document.getElementById('l-results').style.display = 'none';
+  document.getElementById('l-zero').style.display = '';
+  document.getElementById('l-row-captador').classList.remove('hidden');
+  document.getElementById('l-row-indicacao').classList.remove('hidden');
+  document.getElementById('l-row-unico').classList.add('hidden');
+}
+</script>
+</body>
+</html>
